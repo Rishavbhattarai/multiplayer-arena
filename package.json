@@ -1,0 +1,37 @@
+{
+  "name": "multiplayer-realtime-game",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Server-authoritative browser tank arena (TypeScript monorepo: shared / server / client / loadtest)",
+  "type": "module",
+  "workspaces": [
+    "shared",
+    "server",
+    "client",
+    "loadtest"
+  ],
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev:server": "npm run dev -w server",
+    "dev:client": "npm run dev -w client",
+    "start:server": "npm run start -w server",
+    "build": "npm run build -w client",
+    "lint": "eslint .",
+    "typecheck": "tsc -p shared && tsc -p server && tsc -p client && tsc -p loadtest",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "bots": "npm run bots -w loadtest --",
+    "check": "npm run lint && npm run typecheck && npm test && npm run build"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24.0.0",
+    "eslint": "^10.12.0",
+    "globals": "^17.13.0",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.0",
+    "vitest": "^5.0.3"
+  }
+}

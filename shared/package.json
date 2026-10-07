@@ -1,0 +1,10 @@
+{
+  "name": "@tanks/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Protocol types, constants and deterministic movement code shared by client, server and bots",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

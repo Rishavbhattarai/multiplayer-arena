@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tanks Arena</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <main id="lobby">
+      <h1>Tanks Arena</h1>
+      <p class="sub">Week 1 build &middot; mode: <strong id="modeLabel">naive</strong></p>
+      <label>Name <input id="name" maxlength="16" placeholder="tank" autocomplete="off" /></label>
+      <div class="row">
+        <button id="create">Create room</button>
+      </div>
+      <div class="row">
+        <input id="roomCode" maxlength="6" placeholder="ROOM CODE" autocomplete="off" />
+        <button id="join">Join</button>
+      </div>
+      <h2>Open rooms <button id="refresh" class="link">refresh</button></h2>
+      <ul id="roomList"><li class="muted">loading...</li></ul>
+      <p id="lobbyError" class="error" role="alert"></p>
+      <p class="muted small">Server: <code id="serverLabel"></code></p>
+    </main>
+
+    <section id="game" hidden>
+      <div id="hud"></div>
+      <canvas id="canvas"></canvas>
+      <p class="muted small">Move: W/S or Up/Down &middot; Turn: A/D or Left/Right</p>
+    </section>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

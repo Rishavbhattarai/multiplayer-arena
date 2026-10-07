@@ -1,0 +1,32 @@
+# One-command local stack.
+#   docker compose up -d --build                    # server + static client
+#   docker compose --profile redis up -d --build    # + Redis (room registry, not wired yet)
+# Client: http://localhost:8081   Server: http://localhost:8080 (ws://localhost:8080/ws)
+services:
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    environment:
+      PORT: "8080"
+      SERVER_ID: "server-1"
+      ROOM_REGISTRY: "memory"
+      REDIS_URL: "redis://redis:6379"
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    ports:
+      - "8081:80"
+    depends_on:
+      - server
+
+  redis:
+    image: redis:7-alpine
+    profiles: ["redis"]
+    ports:
+      - "6379:6379"

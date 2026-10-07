@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+      - name: Smoke test (server + 2 bots)
+        run: |
+          npm run start:server &
+          for i in $(seq 1 30); do curl -sf http://localhost:8080/healthz && break; sleep 1; done
+          npm run bots -- --bots 2 --duration 3
+          kill %1

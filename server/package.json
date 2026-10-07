@@ -1,0 +1,19 @@
+{
+  "name": "@tanks/server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Authoritative game server: HTTP lobby + WebSocket gateway + 30 Hz fixed tick loop",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@tanks/shared": "*",
+    "tsx": "^4.20.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.18.0"
+  }
+}

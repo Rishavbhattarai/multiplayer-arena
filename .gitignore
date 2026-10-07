@@ -1,0 +1,38 @@
+node_modules/
+dist/
+coverage/
+*.log
+.env
+.DS_Store
+loadtest/results/*.json
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*~
+
+# --- Local tooling / AI assistant state ---
+.claude/
+.playwright-mcp/
+CLAUDE.local.md
+
+# --- Personal notes (not part of the project) ---
+YOUR_TURN.md
+
+# --- Env & secrets ---
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# --- Logs ---
+*.log
+
+# --- TypeScript / Vite ---
+*.tsbuildinfo
+.vite/
+client/dist/

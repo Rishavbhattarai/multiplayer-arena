@@ -1,0 +1,18 @@
+{
+  "name": "@tanks/client",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browser client: HTML5 Canvas + Vite, no game engine",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tanks/shared": "*"
+  },
+  "devDependencies": {
+    "vite": "^8.3.0"
+  }
+}
