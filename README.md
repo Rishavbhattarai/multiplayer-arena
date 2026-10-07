@@ -1,95 +1,103 @@
-# Tanks Arena: Multiplayer Real-Time Game
+# Tanks Arena: Real-Time Multiplayer Netcode
 
-A browser top-down tank arena where the server is the only source of truth, built to show WebSocket netcode: fixed-tick simulation, server authority, and (in later weeks) client prediction, reconciliation, interpolation and lag compensation. TypeScript end to end, HTML5 Canvas, no game engine. Full scope: [SCOPE.md](SCOPE.md).
+[![CI](https://github.com/Rishavbhattarai/-multiplayer-arena/actions/workflows/ci.yml/badge.svg)](https://github.com/Rishavbhattarai/-multiplayer-arena/actions/workflows/ci.yml)
 
-![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg) <!-- replace OWNER/REPO after pushing -->
+A browser tank arena built to study multiplayer networking. A Node.js server runs the game at a fixed 30 ticks per second and broadcasts state over WebSockets. Clients and server share one TypeScript movement module. The game uses Canvas rendering and no game engine, so all the netcode is written by hand and covered by tests.
 
-## Status
+**Stack:** TypeScript (strict), Node.js 22, WebSockets (`ws`), HTML5 Canvas, Vite, Vitest, ESLint, Docker Compose, GitHub Actions
 
-| Week | Deliverable | State |
-|---|---|---|
-| 1 | Rooms, WebSocket protocol, naive server-sent positions | Done: two tabs see each other move (`?mode=naive`) |
-| 2 | Input-only clients, server validation | Hook points in place (`// YOUR TURN`), see [YOUR_TURN.md](YOUR_TURN.md) |
-| 3 | Prediction, reconciliation, interpolation, net simulator | Planned |
-| 4 | Lag compensation, delta snapshots, reconnect | Planned |
-| 5 | Bot load test, demo video, results | Planned |
+## Highlights
 
-Results table (players per server, KB/s per player, playable at 150 ms / 5% loss) will be filled in Week 5 with the hardware stated.
+- Runs a fixed-timestep server loop at 30 Hz that catches up after stalls (up to 5 ticks) and reports overruns.
+- Shares deterministic movement code between client and server. A test runs 10,000 seeded ticks twice and checks the two runs match step by step.
+- Validates every incoming message with a versioned JSON protocol decoder that rejects malformed input.
+- Includes headless bot clients for load testing. In a local run, 2 bots each received 30 snapshots per second at about 5.0 KB/s down and 1.75 KB/s up.
+- 46 tests: protocol encode and decode, deterministic movement, room join, leave and capacity, tick-loop timing on a fake clock, and an end-to-end test with real WebSocket clients.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  B[Browser client<br/>Canvas] <-->|WebSocket| S[Game server<br/>30 Hz tick loop]
+  Bots[Headless bots] <-->|WebSocket| S
+  B -->|HTTP: create / join room| S
+  Shared[shared/<br/>protocol + movement] -.used by.- B & S & Bots
+```
+
+[ADR 0001](docs/adr/0001-transport-raw-ws-vs-socketio-vs-webrtc.md) explains the choice of raw WebSockets over Socket.IO and WebRTC. The protocol and room model are in [docs/design.md](docs/design.md).
 
 ## Quickstart
 
-Requires Node 22.12+ (Vitest 5 and Vite 8 need it) and npm.
+Requires Node 22.12 or later.
 
 ```bash
 npm install
-
-# terminal 1: game server (HTTP + WebSocket on :8080, 30 Hz tick)
-npm run dev:server
-
-# terminal 2: client (Vite on :5173)
-npm run dev:client
+npm run dev:server     # terminal 1: game server on :8080
+npm run dev:client     # terminal 2: client on :5173
 ```
 
-Play in two tabs:
+1. Open http://localhost:5173, enter a name and click **Create room**.
+2. Open the same URL in a second tab, or join from the room list.
+3. W/S or Up/Down moves. A/D or Left/Right turns.
 
-1. Open http://localhost:5173, enter a name, click **Create room**. The URL becomes `?room=XXXXXX&mode=naive`.
-2. Open the same URL in a second tab (or open http://localhost:5173 and join from the room list / room code).
-3. Move with **W/S** (or Up/Down) and turn with **A/D** (or Left/Right). Each tab sees the other tank move.
-
-Headless bots (server must be running):
+Add bots to a room you are watching:
 
 ```bash
-npm run bots -- --bots 2 --duration 5            # creates a room
-npm run bots -- --room XXXXXX --bots 5 --duration 60   # join the room you are watching
+npm run bots -- --room <ROOM_ID> --bots 5 --duration 60
 ```
 
-### Docker
+With Docker, the server runs on :8080 and the client on :8081:
 
 ```bash
-docker compose up -d --build        # server :8080, static client :8081
-docker compose --profile redis up -d --build   # also starts Redis (registry not wired yet)
+docker compose up -d --build
 docker compose down
 ```
 
-## Modes
+## Game modes
 
-- `?mode=naive` (default for now): the Week 1 baseline. The client moves itself and sends its position; the server trusts it and rebroadcasts at 30 Hz; other tanks snap to the latest snapshot. Kept on purpose for the split-screen naive-vs-final demo.
-- `?mode=authoritative` (or `?mode=final`): the room mode exists on the server, but input messages, server-side input application and the client are not written yet (see `// YOUR TURN` hooks and YOUR_TURN.md).
-- `?server=http://host:port` overrides the server (else `VITE_SERVER_URL`, else `<page host>:8080`).
-
-## Scripts
-
-| Command | What it does |
-|---|---|
-| `npm run lint` | ESLint (typescript-eslint strict + stylistic) |
-| `npm run typecheck` | `tsc` strict for shared, server, client, loadtest |
-| `npm test` | Vitest: protocol codec, deterministic movement, rooms, tick loop, WebSocket end-to-end |
-| `npm run build` | Production client build to `client/dist` |
-| `npm run check` | All of the above |
-
-## Layout
-
-```
-shared/    protocol types + codec, constants (TICK_RATE=30), deterministic stepTank
-server/    HTTP lobby, WebSocket gateway, rooms, fixed-timestep loop
-client/    Vite + Canvas client (naive mode)
-loadtest/  headless bots using shared/
-chaos/     planned failure-injection scripts
-docs/      design.md (architecture, protocol), adr/
-```
+- `?mode=naive` (current default): the client moves its own tank and sends its position, and the server relays it. This version stays in the repo as the baseline for a side-by-side comparison with the server-authoritative version.
+- `?mode=authoritative`: the client sends only key inputs and the server simulates movement. In progress.
+- `?server=http://host:port` points the client at a different server.
 
 ## HTTP API
 
 | Method | Path | Result |
 |---|---|---|
-| GET | `/healthz` | `{ ok, rooms, players, serverId }` |
-| GET | `/rooms` | list of rooms |
-| POST | `/rooms` `{ "mode": "naive" \| "authoritative" }` | `201` room info |
-| GET | `/rooms/:id` | room info or `404` |
+| `GET` | `/healthz` | `{ ok, rooms, players, serverId }` |
+| `GET` | `/rooms` | List of rooms |
+| `POST` | `/rooms` | Body `{ "mode": "naive" \| "authoritative" }`. Returns `201` with the room. |
+| `GET` | `/rooms/:id` | Room, or `404` |
 
-WebSocket: `ws://host:8080/ws`, protocol described in [docs/design.md](docs/design.md).
+Rooms hold up to 8 players and close 30 seconds after the last player leaves. The WebSocket endpoint is `ws://host:8080/ws`.
 
-## Docs
+## Development
 
-- [Design](docs/design.md)
-- [ADR 0001: raw ws vs Socket.IO vs WebRTC](docs/adr/0001-transport-raw-ws-vs-socketio-vs-webrtc.md)
+| Command | What it does |
+|---|---|
+| `npm run lint` | ESLint with typescript-eslint strict rules |
+| `npm run typecheck` | Strict `tsc` across all packages |
+| `npm test` | Vitest suite |
+| `npm run build` | Production client build |
+| `npm run check` | All of the above |
+
+```
+shared/     protocol types and codec, constants, deterministic movement
+server/     HTTP lobby, WebSocket gateway, rooms, tick loop
+client/     Vite + Canvas client
+loadtest/   headless bots
+docs/       design.md, adr/
+```
+
+## Roadmap
+
+| Stage | Scope | Status |
+|---|---|---|
+| 1 | Rooms, WebSocket protocol, fixed tick loop, naive position sync | Done |
+| 2 | Input-only clients, server-side movement, input validation against speed and teleport cheats | In progress |
+| 3 | Client-side prediction, server reconciliation, interpolation, network-condition simulator | Planned |
+| 4 | Lag compensation, delta snapshots, reconnect within 30 seconds | Planned |
+| 5 | Bot load test and a side-by-side lag comparison video | Planned |
+
+## Results
+
+Not measured yet. Stage 5 will publish players per server before tick time exceeds its 33 ms budget, bandwidth per player before and after delta snapshots, and playability at 150 ms latency with 5% packet loss.
