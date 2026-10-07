@@ -11,20 +11,26 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body { margin: 0; background: var(--bg); color: var(--fg); display: flex; justify-content: center; }
+a { color: var(--accent); }
 #lobby { max-width: 420px; width: 100%; padding: 32px 16px; display: flex; flex-direction: column; gap: 12px; }
 h1 { margin: 0; }
 h2 { font-size: 1rem; margin: 16px 0 0; }
 .sub, .muted { color: var(--muted); }
 .small { font-size: 0.8rem; }
 .row { display: flex; gap: 8px; }
-input { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #333c4a; background: var(--panel); color: var(--fg); font: inherit; }
+input, select { padding: 6px 8px; border-radius: 6px; border: 1px solid #333c4a; background: var(--panel); color: var(--fg); font: inherit; }
+.row input { flex: 1; }
 #roomCode { text-transform: uppercase; letter-spacing: 0.1em; }
 button { padding: 8px 14px; border-radius: 6px; border: 0; background: var(--accent); color: #061320; font: inherit; font-weight: 600; cursor: pointer; }
+button.secondary { background: var(--panel); color: var(--fg); border: 1px solid #333c4a; font-weight: 400; padding: 6px 10px; }
 button.link { background: none; color: var(--accent); padding: 0 4px; font-weight: 400; }
 #roomList { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
 #roomList li { display: flex; justify-content: space-between; align-items: center; background: var(--panel); padding: 6px 10px; border-radius: 6px; }
 .error { color: var(--error); min-height: 1.2em; }
 #game { padding: 12px 16px; width: 100%; max-width: 1232px; }
-#hud { font: 13px ui-monospace, Menlo, monospace; color: var(--muted); margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 4px 16px; }
+#hud { font: 12px ui-monospace, Menlo, monospace; color: var(--muted); margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 4px 14px; }
 #hud b { color: var(--fg); font-weight: 600; }
-canvas { width: 100%; height: auto; display: block; background: #0c0f14; border-radius: 8px; }
+canvas { width: 100%; height: auto; display: block; background: #0c0f14; border-radius: 8px; cursor: crosshair; }
+#controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 8px; }
+#netsim { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; border: 1px solid #333c4a; border-radius: 6px; padding: 4px 10px 8px; font-size: 0.8rem; color: var(--muted); }
+#netsim input { width: 70px; }

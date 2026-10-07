@@ -23,7 +23,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "bots": "npm run bots -w loadtest --",
-    "check": "npm run lint && npm run typecheck && npm test && npm run build"
+    "check": "npm run lint && npm run typecheck && npm test && npm run build",
+    "cheat": "npm run cheat -w loadtest --",
+    "ramp": "npm run ramp -w loadtest --",
+    "bandwidth": "npm run bandwidth -w loadtest --"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

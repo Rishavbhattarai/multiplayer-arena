@@ -1,0 +1,110 @@
+{
+  "date": "2026-10-07T10:23:40.575Z",
+  "label": "same command, host shared with two other projects' load tests (1-min load average ~20-60, not recorded per row)",
+  "hardware": "Apple M4, 10 cores, 16 GB",
+  "node": "v24.11.0",
+  "mode": "authoritative",
+  "step": 80,
+  "stepSeconds": 10,
+  "workers": 2,
+  "stopReason": "p99 tick time 37.783 ms > 33.3 ms budget",
+  "maxPlayersWithinBudget": 560,
+  "rows": [
+    {
+      "players": 80,
+      "ticksPerSec": 30,
+      "tickP50Ms": 1.668,
+      "tickP99Ms": 3.437,
+      "tickMaxMs": 5.801,
+      "serverCpuPct": 12,
+      "serverKBOutPerSec": 513.4,
+      "kbPerPlayerPerSec": 6.42,
+      "botSnapsPerSecPerBot": 29.9,
+      "maxWorkerCpuPct": 9
+    },
+    {
+      "players": 160,
+      "ticksPerSec": 30,
+      "tickP50Ms": 2.8,
+      "tickP99Ms": 6.375,
+      "tickMaxMs": 8.906,
+      "serverCpuPct": 15.8,
+      "serverKBOutPerSec": 1056.5,
+      "kbPerPlayerPerSec": 6.6,
+      "botSnapsPerSecPerBot": 29.9,
+      "maxWorkerCpuPct": 12
+    },
+    {
+      "players": 240,
+      "ticksPerSec": 30,
+      "tickP50Ms": 4.475,
+      "tickP99Ms": 9.294,
+      "tickMaxMs": 9.704,
+      "serverCpuPct": 24.6,
+      "serverKBOutPerSec": 1594.9,
+      "kbPerPlayerPerSec": 6.65,
+      "botSnapsPerSecPerBot": 30.1,
+      "maxWorkerCpuPct": 15
+    },
+    {
+      "players": 320,
+      "ticksPerSec": 30,
+      "tickP50Ms": 5.223,
+      "tickP99Ms": 9.475,
+      "tickMaxMs": 10.845,
+      "serverCpuPct": 29.9,
+      "serverKBOutPerSec": 2076.2,
+      "kbPerPlayerPerSec": 6.49,
+      "botSnapsPerSecPerBot": 30,
+      "maxWorkerCpuPct": 19
+    },
+    {
+      "players": 400,
+      "ticksPerSec": 30,
+      "tickP50Ms": 6.186,
+      "tickP99Ms": 14.765,
+      "tickMaxMs": 15.082,
+      "serverCpuPct": 33.3,
+      "serverKBOutPerSec": 2682.3,
+      "kbPerPlayerPerSec": 6.71,
+      "botSnapsPerSecPerBot": 29.9,
+      "maxWorkerCpuPct": 23
+    },
+    {
+      "players": 480,
+      "ticksPerSec": 30,
+      "tickP50Ms": 6.697,
+      "tickP99Ms": 14.759,
+      "tickMaxMs": 16.404,
+      "serverCpuPct": 37.7,
+      "serverKBOutPerSec": 3229.7,
+      "kbPerPlayerPerSec": 6.73,
+      "botSnapsPerSecPerBot": 29.9,
+      "maxWorkerCpuPct": 26
+    },
+    {
+      "players": 560,
+      "ticksPerSec": 30,
+      "tickP50Ms": 9.497,
+      "tickP99Ms": 22.287,
+      "tickMaxMs": 23.837,
+      "serverCpuPct": 51.5,
+      "serverKBOutPerSec": 3707,
+      "kbPerPlayerPerSec": 6.62,
+      "botSnapsPerSecPerBot": 30,
+      "maxWorkerCpuPct": 35
+    },
+    {
+      "players": 640,
+      "ticksPerSec": 30,
+      "tickP50Ms": 10.801,
+      "tickP99Ms": 37.783,
+      "tickMaxMs": 53.416,
+      "serverCpuPct": 57.9,
+      "serverKBOutPerSec": 4272.8,
+      "kbPerPlayerPerSec": 6.68,
+      "botSnapsPerSecPerBot": 30,
+      "maxWorkerCpuPct": 39
+    }
+  ]
+}

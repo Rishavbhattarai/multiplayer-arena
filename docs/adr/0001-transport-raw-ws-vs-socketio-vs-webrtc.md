@@ -31,6 +31,6 @@ Use raw WebSockets via `ws`. Keep the transport behind a thin wrapper (`client/s
 
 ## Consequences
 
-- Packet loss on TCP causes stalls rather than gaps. We will simulate loss honestly with the client network simulator (Week 3), show its effect in the demo, and discuss it in the README.
-- Interpolation buffering (~100 ms) and snapshot redundancy help hide brief stalls.
-- If the project ever needs real UDP behaviour, WebTransport (HTTP/3 datagrams) or WebRTC data channels are the next step; that would be a new ADR.
+- Packet loss on TCP causes stalls rather than gaps. The client network simulator models this (`tcp` loss model: a lost message waits a retransmission timeout and blocks everything behind it). At 150 ms RTT and 5% loss, each loss stalls the stream for about 230 ms.
+- Interpolation (100 ms) plus up to 200 ms of extrapolation hides most stalls for remote tanks (ADR 0003). The input token bucket lets the server catch up on inputs that arrive in a burst after a stall (ADR 0006).
+- If the project ever needs real UDP behaviour, WebTransport (HTTP/3 datagrams) or WebRTC data channels are the next step; that would be a new ADR. The simulator's `drop` loss model shows roughly what that would look like.

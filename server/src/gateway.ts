@@ -3,11 +3,10 @@ import {
   HEARTBEAT_INTERVAL_MS,
   PROTOCOL_VERSION,
   decodeClientMessage,
-  encode,
   type ServerMessage,
 } from "@tanks/shared";
 import type { Logger } from "./log.js";
-import type { Room, PlayerConnection } from "./room.js";
+import { sendMsg, type PlayerConnection, type Room, type SendKind } from "./room.js";
 import type { RoomManager } from "./roomManager.js";
 
 function toText(data: RawData): string {
@@ -16,13 +15,23 @@ function toText(data: RawData): string {
   return Buffer.from(new Uint8Array(data)).toString("utf8");
 }
 
+export interface GatewayHooks {
+  onSend?(kind: SendKind, bytes: number): void;
+  onReceive?(bytes: number): void;
+}
+
 /**
  * WebSocket gateway: owns sockets, decodes frames, routes them to rooms and
  * runs transport-level heartbeats. Rooms never see a socket directly.
  *
  * Returns a function that stops the heartbeat timer.
  */
-export function attachGateway(wss: WebSocketServer, manager: RoomManager, log: Logger): () => void {
+export function attachGateway(
+  wss: WebSocketServer,
+  manager: RoomManager,
+  log: Logger,
+  hooks: GatewayHooks = {},
+): () => void {
   const alive = new WeakMap<WebSocket, boolean>();
 
   wss.on("connection", (ws, req) => {
@@ -31,27 +40,33 @@ export function attachGateway(wss: WebSocketServer, manager: RoomManager, log: L
 
     let session: { room: Room; playerId: number } | null = null;
     const conn: PlayerConnection = {
-      send(msg: ServerMessage) {
-        if (ws.readyState === WebSocket.OPEN) ws.send(encode(msg));
+      sendRaw(data: string, kind: SendKind) {
+        if (ws.readyState !== WebSocket.OPEN) return;
+        ws.send(data);
+        hooks.onSend?.(kind, Buffer.byteLength(data));
       },
     };
+    const send = (msg: ServerMessage) => sendMsg(conn, msg);
     const remote = req.socket.remoteAddress;
 
     ws.on("message", (data, isBinary) => {
-      const msg = isBinary ? null : decodeClientMessage(toText(data));
+      const text = isBinary ? null : toText(data);
+      hooks.onReceive?.(text === null ? 0 : Buffer.byteLength(text));
+      const msg = text === null ? null : decodeClientMessage(text);
       if (!msg) {
-        conn.send({ t: "error", code: "BAD_MESSAGE", message: "malformed or unknown message" });
+        if (session) session.room.reportMalformed(session.playerId);
+        send({ t: "error", code: "BAD_MESSAGE", message: "malformed or unknown message" });
         return;
       }
 
       switch (msg.t) {
         case "join": {
           if (session) {
-            conn.send({ t: "error", code: "ALREADY_JOINED", message: "socket already joined a room" });
+            send({ t: "error", code: "ALREADY_JOINED", message: "socket already joined a room" });
             return;
           }
           if (msg.v !== PROTOCOL_VERSION) {
-            conn.send({
+            send({
               t: "error",
               code: "VERSION_MISMATCH",
               message: `server speaks protocol v${PROTOCOL_VERSION}, client sent v${msg.v}`,
@@ -61,25 +76,37 @@ export function attachGateway(wss: WebSocketServer, manager: RoomManager, log: L
           }
           const room = manager.getRoom(msg.roomId);
           if (!room) {
-            conn.send({ t: "error", code: "ROOM_NOT_FOUND", message: `no room ${msg.roomId}` });
+            send({ t: "error", code: "ROOM_NOT_FOUND", message: `no room ${msg.roomId}` });
             return;
           }
-          const result = room.join(msg.name, conn);
+          const result = msg.resume ? room.resume(msg.resume, conn) : room.join(msg.name, conn);
           if (!result.ok) {
-            conn.send({ t: "error", code: result.code, message: result.message });
+            send({ t: "error", code: result.code, message: result.message });
             return;
           }
           session = { room, playerId: result.player.id };
-          log("info", "player joined", { roomId: room.id, playerId: result.player.id, remote });
+          log("info", msg.resume ? "player resumed" : "player joined", {
+            roomId: room.id,
+            playerId: result.player.id,
+            remote,
+          });
           return;
         }
         case "ping":
-          conn.send({ t: "pong", id: msg.id, ts: msg.ts, serverTick: session?.room.tick ?? 0 });
+          send({ t: "pong", id: msg.id, ts: msg.ts, serverTick: session?.room.tick ?? 0 });
           return;
-        // YOUR TURN (see YOUR_TURN.md, push 2/3): route "input" messages to the room too.
+        case "leave":
+          if (session) {
+            session.room.remove(session.playerId, Date.now());
+            log("info", "player left", { roomId: session.room.id, playerId: session.playerId });
+            session = null;
+          }
+          ws.close(1000, "left");
+          return;
         case "state":
+        case "input":
           if (!session) {
-            conn.send({ t: "error", code: "NOT_JOINED", message: "send a join message first" });
+            send({ t: "error", code: "NOT_JOINED", message: "send a join message first" });
             return;
           }
           session.room.handleMessage(session.playerId, msg);
@@ -88,8 +115,11 @@ export function attachGateway(wss: WebSocketServer, manager: RoomManager, log: L
     });
 
     ws.on("close", () => {
-      if (session && session.room.leave(session.playerId, Date.now())) {
-        log("info", "player left", { roomId: session.room.id, playerId: session.playerId });
+      if (session && session.room.disconnect(session.playerId, conn, Date.now())) {
+        log("info", "player disconnected (held for reconnect)", {
+          roomId: session.room.id,
+          playerId: session.playerId,
+        });
       }
       session = null;
     });

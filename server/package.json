@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@tanks/shared": "*",
+    "prom-client": "^15.1.3",
     "tsx": "^4.20.0",
     "ws": "^8.18.0"
   },

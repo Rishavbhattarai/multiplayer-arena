@@ -5,9 +5,9 @@
  * through this interface means horizontal scaling (stretch goal) only needs a
  * shared implementation, not changes to callers.
  *
- * TODO(redis): add RedisRoomRegistry (HSET rooms <roomId> <serverId>, with a
- * per-server heartbeat key + TTL so rooms of a dead server can be reaped).
- * `docker compose --profile redis up` already starts a Redis 7 container.
+ * Not built: RedisRoomRegistry (HSET rooms <roomId> <serverId>, plus a
+ * per-server heartbeat key with a TTL so rooms of a dead server can be reaped).
+ * It only matters once there is more than one game server.
  */
 export interface RoomRegistry {
   register(roomId: string, serverId: string): Promise<void>;

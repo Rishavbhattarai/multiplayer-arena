@@ -10,7 +10,7 @@
   <body>
     <main id="lobby">
       <h1>Tanks Arena</h1>
-      <p class="sub">Week 1 build &middot; mode: <strong id="modeLabel">naive</strong></p>
+      <p class="sub">New rooms: <strong id="modeLabel">authoritative</strong> &middot; <a id="modeSwitch" href="#">switch</a></p>
       <label>Name <input id="name" maxlength="16" placeholder="tank" autocomplete="off" /></label>
       <div class="row">
         <button id="create">Create room</button>
@@ -28,7 +28,22 @@
     <section id="game" hidden>
       <div id="hud"></div>
       <canvas id="canvas"></canvas>
-      <p class="muted small">Move: W/S or Up/Down &middot; Turn: A/D or Left/Right</p>
+      <div id="controls">
+        <span class="muted small">W/S move &middot; A/D turn &middot; mouse aims &middot; click or Space fires</span>
+        <fieldset id="netsim">
+          <legend>Network simulator</legend>
+          <label>lag (RTT ms) <input id="nsLag" type="number" min="0" max="2000" step="10" /></label>
+          <label>jitter ms <input id="nsJitter" type="number" min="0" max="1000" step="5" /></label>
+          <label>loss % <input id="nsLoss" type="number" min="0" max="50" step="1" /></label>
+          <label>loss model
+            <select id="nsModel"><option value="tcp">tcp (retransmit)</option><option value="drop">drop</option></select>
+          </label>
+          <button id="nsPreset" class="secondary" title="150 ms RTT, 20 ms jitter, 5% loss">150 ms / 5%</button>
+          <button id="nsOff" class="secondary">off</button>
+        </fieldset>
+        <button id="dropConn" class="secondary" title="Close the socket and resume with the reconnect token">Drop connection</button>
+        <button id="leave" class="secondary">Leave</button>
+      </div>
     </section>
 
     <script type="module" src="/src/main.ts"></script>

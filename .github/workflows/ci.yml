@@ -8,8 +8,8 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -19,9 +19,38 @@ jobs:
       - run: npm test
       - run: npm run build
 
-      - name: Smoke test (server + 2 bots)
+      - name: Smoke test (server + bots + cheating bot)
         run: |
           npm run start:server &
           for i in $(seq 1 30); do curl -sf http://localhost:8080/healthz && break; sleep 1; done
-          npm run bots -- --bots 2 --duration 3
+          npm run bots -- --bots 4 --duration 4
+          npm run bots -- --mode naive --bots 2 --duration 3
+          npm run bots -- --bots 3 --duration 6 --drop-every 2
+          npm run cheat -w loadtest
           kill %1
+
+  compose-smoke:
+    # Full stack via docker compose: bots through the nginx proxy and directly, plus the cheating bot.
+    runs-on: ubuntu-latest
+    needs: check
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Start stack
+        run: docker compose up -d --build --wait server client
+      - name: Bots through the client's nginx proxy (with reconnects)
+        run: npm run bots -- --url http://localhost:8081 --bots 4 --duration 6 --drop-every 2
+      - name: Naive-mode bots directly against the server
+        run: npm run bots -- --url http://localhost:8080 --mode naive --bots 2 --duration 3
+      - name: Cheating bot is rejected
+        run: npm run cheat -w loadtest -- --url http://localhost:8080
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs
+      - name: Tear down
+        if: always()
+        run: docker compose down -v

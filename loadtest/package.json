@@ -5,7 +5,10 @@
   "description": "Headless bot clients that speak the shared protocol",
   "type": "module",
   "scripts": {
-    "bots": "tsx src/bots.ts"
+    "bots": "tsx src/bots.ts",
+    "cheat": "tsx cheat-bot.ts",
+    "ramp": "tsx src/ramp.ts",
+    "bandwidth": "tsx src/bandwidth.ts"
   },
   "dependencies": {
     "@tanks/shared": "*",

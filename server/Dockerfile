@@ -18,5 +18,5 @@ COPY server server
 USER node
 EXPOSE 8080
 ENV PORT=8080
-HEALTHCHECK --interval=10s --timeout=3s --retries=3 CMD wget -qO- http://127.0.0.1:8080/healthz || exit 1
+HEALTHCHECK --interval=5s --timeout=3s --retries=10 CMD wget -qO- http://127.0.0.1:8080/healthz || exit 1
 CMD ["node_modules/.bin/tsx", "server/src/index.ts"]

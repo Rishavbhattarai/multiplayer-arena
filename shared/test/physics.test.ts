@@ -94,3 +94,18 @@ describe("deterministic movement", () => {
     expect(new Set(pts.map((p) => `${p.x},${p.y}`)).size).toBe(8);
   });
 });
+
+describe("geometry helpers", () => {
+  it("raycastCircle hits a circle in front and misses one behind or out of range", async () => {
+    const { raycastCircle } = await import("../src/index.js");
+    expect(raycastCircle(0, 0, 0, 100, 50, 0, 10)).toBeCloseTo(40);
+    expect(raycastCircle(0, 0, Math.PI, 100, 50, 0, 10)).toBeNull();
+    expect(raycastCircle(0, 0, 0, 30, 50, 0, 10)).toBeNull();
+    expect(raycastCircle(0, 0, 0, 100, 50, 11, 10)).toBeNull();
+  });
+
+  it("lerpAngle takes the short way around", async () => {
+    const { lerpAngle } = await import("../src/index.js");
+    expect(lerpAngle(Math.PI - 0.1, -Math.PI + 0.1, 0.5)).toBeCloseTo(-Math.PI, 5);
+  });
+});

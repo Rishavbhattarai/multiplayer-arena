@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-07T16:17:28.430Z",
+  "rooms": 4,
+  "playersPerRoom": 8,
+  "seconds": 20,
+  "results": [
+    {
+      "variant": "naive (client positions, full snapshots)",
+      "players": 32,
+      "downKBps": 24.04,
+      "upKBps": 1.75,
+      "serverOutKBpsPerPlayer": 24.12,
+      "deltaShare": 0,
+      "missingBase": 0
+    },
+    {
+      "variant": "authoritative, full snapshots",
+      "players": 32,
+      "downKBps": 24.3,
+      "upKBps": 2.22,
+      "serverOutKBpsPerPlayer": 24.39,
+      "deltaShare": 0,
+      "missingBase": 0
+    },
+    {
+      "variant": "authoritative, delta snapshots",
+      "players": 32,
+      "downKBps": 6.64,
+      "upKBps": 2.22,
+      "serverOutKBpsPerPlayer": 6.52,
+      "deltaShare": 0.998,
+      "missingBase": 0
+    }
+  ]
+}

@@ -79,3 +79,42 @@ export function spawnPoint(slot: number): TankState {
   const angle = row === 0 ? Math.PI / 2 : -Math.PI / 2;
   return { x: quantize(x), y: quantize(y), angle: quantize(angle) };
 }
+
+/** Linear interpolation. */
+export function lerp(a: number, b: number, t: number): number {
+  return a + (b - a) * t;
+}
+
+/** Interpolate between two angles along the shortest arc. */
+export function lerpAngle(a: number, b: number, t: number): number {
+  return normalizeAngle(a + normalizeAngle(b - a) * t);
+}
+
+/**
+ * Distance along a ray (origin ox,oy; direction `angle`) to the first point
+ * where it enters a circle, or null if it misses within `range`.
+ * Used for hitscan shots.
+ */
+export function raycastCircle(
+  ox: number,
+  oy: number,
+  angle: number,
+  range: number,
+  cx: number,
+  cy: number,
+  r: number,
+): number | null {
+  const dx = Math.cos(angle);
+  const dy = Math.sin(angle);
+  const fx = ox - cx;
+  const fy = oy - cy;
+  const b = fx * dx + fy * dy;
+  const c = fx * fx + fy * fy - r * r;
+  const disc = b * b - c;
+  if (disc < 0) return null;
+  const sq = Math.sqrt(disc);
+  let t = -b - sq;
+  if (t < 0) t = -b + sq; // origin inside the circle
+  if (t < 0 || t > range) return null;
+  return t;
+}
