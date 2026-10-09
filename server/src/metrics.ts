@@ -1,5 +1,5 @@
 import { Counter, Gauge, Histogram, Registry, collectDefaultMetrics } from "prom-client";
-import { TICK_MS, type ServerStats } from "@tanks/shared";
+import type { ServerStats } from "@tanks/shared";
 import type { RejectReason, SendKind } from "./room.js";
 
 /** Prometheus metrics (GET /metrics). Names are prefixed `tanks_`. */
@@ -144,5 +144,3 @@ export class StatsWindow {
     };
   }
 }
-
-export const TICK_BUDGET_MS = TICK_MS;

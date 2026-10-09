@@ -20,8 +20,6 @@ export interface NetSimSettings {
   lossModel: LossModel;
 }
 
-export const NO_NETSIM: NetSimSettings = { latencyMs: 0, jitterMs: 0, lossPct: 0, lossModel: "tcp" };
-
 /** Linux's minimum retransmission timeout. */
 export const MIN_RTO_MS = 200;
 
