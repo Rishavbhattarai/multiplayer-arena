@@ -230,14 +230,24 @@ export class Bot {
    */
   async dropAndResume(offlineMs = 500): Promise<void> {
     this.paused = true;
-    await new Promise((r) => setTimeout(r, 250));
-    const me = this.stats.playerId === null ? undefined : this.world.get(this.stats.playerId);
+    // Inputs already in flight may still move the tank, so wait until its position stops changing.
+    let me = this.myTank();
+    for (let stable = 0, i = 0; stable < 4 && i < 60; i++) {
+      await new Promise((r) => setTimeout(r, 50));
+      const next = this.myTank();
+      stable = next && me && next.x === me.x && next.y === me.y ? stable + 1 : 0;
+      me = next;
+    }
     this.beforeDrop = me ? { x: me.x, y: me.y } : null;
     this.ws?.terminate();
     this.stats.connected = false;
     await new Promise((r) => setTimeout(r, offlineMs));
     await this.connect();
     this.paused = false;
+  }
+
+  private myTank() {
+    return this.stats.playerId === null ? undefined : this.world.get(this.stats.playerId);
   }
 
   leave(): void {
